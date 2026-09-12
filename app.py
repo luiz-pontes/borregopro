@@ -8,7 +8,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Estilização CSS para Visual Rural (Tons de Verde, Terra e Clean)
+# Estilização CSS para Visual Rural (Tons de Verde, Terra e Ajuste de Fonte)
 st.markdown("""
     <style>
     /* Fundo da página e fontes */
@@ -22,11 +22,13 @@ st.markdown("""
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     
-    /* Enfatizar cartões/seções */
-    div[data-testid="stExpander"], div[data-testid="stVerticalBlock"] > div {
-        border-radius: 8px;
+    /* Ajuste no tamanho da fonte dos rótulos para caberem em 1 linha */
+    div[data-testid="stWidgetLabel"] label p {
+        font-size: 0.9rem !important;
+        font-weight: 600 !important;
+        color: #1e4620 !important;
     }
-    
+
     /* Botões em verde rural */
     .stButton>button {
         background-color: #2e7d32 !important;
@@ -49,7 +51,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # 2. Controle de Acesso / Senha
-SENHA_CORRETA = "borrego2026"  # Altere para a sua senha de preferência
+SENHA_CORRETA = "borrego2026"
 
 if "autenticado" not in st.session_state:
     st.session_state["autenticado"] = False
@@ -81,20 +83,23 @@ with st.sidebar:
 st.title("📊 Calculadora de Confinamento & Estrutura Dietética")
 st.markdown("Insira os dados do lote, desempenho esperado e a proporção da dieta em Matéria Seca (MS).")
 
+# Nota estratégica orientando o produtor
+st.info("💡 **Atenção Produtor:** Os cálculos consideram o **peso médio individual por animal** (cabeça), e não a soma total do lote todo.")
+
 st.markdown("---")
 
 # Seção 1: Desempenho Animal
-st.subheader("1. Desempenho e Consumo do Lote")
+st.subheader("1. Desempenho e Consumo Individual (Por Cabeça)")
 col1, col2 = st.columns(2)
 
 with col1:
-    peso_inicial = st.number_input("Peso Inicial (kg):", value=16.0, step=0.5)
-    peso_meta = st.number_input("Peso Meta de Abate (kg):", value=40.0, step=0.5)
+    peso_inicial = st.number_input("Peso Inicial Médio (kg/animal):", value=16.0, step=0.5)
+    peso_meta = st.number_input("Peso Meta Médio (kg/animal):", value=40.0, step=0.5)
 
 with col2:
     gpd = st.number_input("Ganho de Peso Esperado (g/dia):", value=280.0, step=10.0)
     consumo_ms_pct = st.number_input(
-        "Consumo Total Estimado (% do Peso Vivo em MS):", 
+        "Consumo Estimado (% do Peso Vivo em MS):", 
         value=3.50, 
         step=0.1,
         help="Média de consumo diário em matéria seca em relação ao peso médio do animal."
@@ -124,17 +129,27 @@ st.subheader("3. Custos da Dieta e Preço de Venda")
 col5, col6, col7 = st.columns(3)
 
 with col5:
-    custo_volumoso_kg = st.number_input("Custo do kg do Volumoso (R$/kg MN):", value=0.30, step=0.05)
+    custo_volumoso_kg = st.number_input(
+        "Custo do Volumoso (R$/kg MN):", 
+        value=0.30, 
+        step=0.05,
+        help="Preço por quilo em Matéria Natural (como fornecido no cocho)."
+    )
 
 with col6:
-    custo_concentrado_kg = st.number_input("Custo do kg do Concentrado (R$/kg MN):", value=2.80, step=0.10)
+    custo_concentrado_kg = st.number_input(
+        "Custo do Concentrado (R$/kg MN):", 
+        value=2.80, 
+        step=0.10,
+        help="Preço por quilo da ração/concentrado em Matéria Natural."
+    )
 
 with col7:
-    preco_venda_kg = st.number_input("Preço de Venda do kg Vivo (R$):", value=12.00, step=0.50)
+    preco_venda_kg = st.number_input("Preço Venda Vivo (R$/kg):", value=12.00, step=0.50)
 
 # 5. Cálculos da Simulação
 st.markdown("---")
-st.subheader("📈 Resultados da Simulação")
+st.subheader("📈 Resultados da Simulação (Por Animal)")
 
 if gpd > 0 and peso_meta > peso_inicial:
     ganho_total_kg = peso_meta - peso_inicial
@@ -164,3 +179,6 @@ if gpd > 0 and peso_meta > peso_inicial:
 
 else:
     st.warning("Verifique os valores informados de Peso Inicial, Peso Meta e Ganho de Peso Diário.")
+
+st.markdown("---")
+st.caption("📌 **Nota:** Esta ferramenta é uma simulação de desempenho baseada em consumo médio diário. Para lote fechado, multiplique o consumo pelo número total de animais.")
